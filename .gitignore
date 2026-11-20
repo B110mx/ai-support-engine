@@ -1,0 +1,11 @@
+node_modules/
+.env
+coverage/
+results/*.json
+results/*.md
+!results/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
+work/
+outputs/

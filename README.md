@@ -1,45 +1,45 @@
 # AI Support Engine
 
-Prototipo de clasificación inteligente de solicitudes de soporte con dos enfoques: reglas deterministas e inteligencia artificial generativa real mediante la API de Gemini.
+API en Python para clasificar solicitudes de soporte mediante reglas deterministas o IA generativa real con Gemini.
 
-## Funcionalidades
+## Tecnologías
 
-- Categorías: `ACCESS`, `BUG`, `FEATURE` y `SECURITY`.
-- Prioridades: `LOW`, `MEDIUM`, `HIGH` y `CRITICAL`.
-- Modos `traditional` y `generative` con el mismo contrato JSON.
-- Validación de entradas, límite de tamaño y errores controlados.
-- Revisión humana obligatoria para posibles incidentes de seguridad.
-- Salida estructurada del modelo generativo y defensa contra prompt injection.
-- Suite automática y comparación de 10 casos para ambos motores.
+- Python 3.11+
+- FastAPI y Uvicorn
+- Pydantic y pydantic-settings
+- Google Gen AI SDK
+- pytest y pytest-cov
+- GitHub Actions
 
-## Requisitos
-
-- Node.js 20 o posterior.
-- Una clave de la API de Gemini para el modo generativo.
+Consulta el [plan](docs/PLAN.md) y la [arquitectura](docs/ARCHITECTURE.md).
 
 ## Configuración
 
-1. Copia `.env.example` como `.env`.
-2. Define `GEMINI_API_KEY` en tu terminal o carga las variables de `.env` con la herramienta que prefieras.
+```bash
+python -m venv .venv
+```
 
 PowerShell:
 
 ```powershell
-$env:GEMINI_API_KEY="tu_clave"
-$env:GEMINI_MODEL="gemini-2.5-flash"
+.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+Copy-Item .env.example .env
 ```
 
-No subas claves al repositorio. El archivo `.env` está ignorado por Git.
+Define `GEMINI_API_KEY` dentro de `.env`. Nunca subas ese archivo al repositorio.
 
 ## Ejecución
 
 ```bash
-npm start
+uvicorn app.main:app --reload
 ```
 
-El servidor escucha en `http://localhost:3000`. Comprueba su estado con `GET /health`.
+- API: `http://localhost:8000`
+- Documentación interactiva: `http://localhost:8000/docs`
+- Salud: `GET /health`
 
-## API
+## Contrato
 
 `POST /api/analyze`
 
@@ -49,8 +49,6 @@ El servidor escucha en `http://localhost:3000`. Comprueba su estado con `GET /he
   "mode": "traditional"
 }
 ```
-
-Respuesta:
 
 ```json
 {
@@ -62,30 +60,37 @@ Respuesta:
 }
 ```
 
-Ejemplo con PowerShell:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/analyze -ContentType application/json -Body '{"message":"No puedo iniciar sesión","mode":"traditional"}'
-```
+`mode` acepta `traditional` o `generative`. Ambos motores respetan el mismo contrato.
 
 ## Pruebas
 
 ```bash
-npm test
+pytest
 ```
 
-Para ejecutar 10 solicitudes en ambos motores y generar evidencia real:
+## Evidencia comparativa
+
+El archivo `data/test_cases.json` contiene 10 solicitudes normales, ambiguas y adversariales. Para ejecutar ambos motores realmente:
 
 ```bash
-npm run compare
+python scripts/compare.py
 ```
 
-El resultado se guarda en `results/comparison.json`. Ejecútalo con una clave válida antes de entregar; después agrega el archivo generado al repositorio como evidencia.
+Se generan:
 
-## Decisiones técnicas
+- `results/comparison.csv`: 20 filas, 10 por motor.
+- `results/summary.json`: precisión de cada motor.
 
-El motor tradicional usa reglas explícitas y da prioridad a seguridad antes que a las demás categorías. El motor generativo trata el mensaje como datos no confiables, exige JSON mediante un esquema y valida nuevamente la salida. Se eligió Node.js sin dependencias de producción para reducir la superficie de ataque y facilitar la ejecución.
+Estos archivos deben conservarse como evidencia antes de la entrega.
+
+## Seguridad
+
+- Entrada limitada a 5,000 caracteres y sin campos desconocidos.
+- El mensaje se delimita como contenido no confiable.
+- La salida generativa se valida con Pydantic.
+- Cualquier resultado `SECURITY` exige revisión humana.
+- Las credenciales solo se leen desde variables de entorno.
 
 ## Conclusión técnica
 
-La comparación debe ejecutarse con una clave real antes de completar esta sección. El motor tradicional ofrece resultados rápidos, reproducibles y explicables para mensajes claros, pero pierde precisión ante lenguaje ambiguo. El motor generativo puede comprender mejor el contexto y redactar respuestas personalizadas, aunque depende de un proveedor externo y requiere validar estrictamente su salida. La tabla generada por `npm run compare` permite elegir el mejor motor con evidencia cuantitativa y documentar fallos de formato o clasificación.
+La conclusión final se redactará después de ejecutar los 10 casos con una clave real. El motor tradicional es rápido, reproducible y explicable, pero depende de vocabulario previsto. El motor generativo comprende mejor lenguaje ambiguo y redacta respuestas contextuales, aunque introduce latencia, costo y dependencia externa. La decisión sobre cuál funcionó mejor debe basarse en la precisión registrada en `results/summary.json`, no en respuestas simuladas.

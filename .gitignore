@@ -1,9 +1,12 @@
-node_modules/
 .env
 coverage/
-results/*.json
-results/*.md
-!results/.gitkeep
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+htmlcov/
+.coverage
 *.log
 .DS_Store
 Thumbs.db

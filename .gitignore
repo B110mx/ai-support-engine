@@ -1,4 +1,11 @@
 .env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+htmlcov/
+.coverage
 *.log
 .DS_Store
 Thumbs.db

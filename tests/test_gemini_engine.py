@@ -27,6 +27,14 @@ def test_analyze_returns_validated_engine_result() -> None:
     call = client.models.generate_content.call_args
     assert "<ticket_usuario>" in call.kwargs["contents"]
     assert call.kwargs["config"].response_mime_type == "application/json"
+    response_schema = call.kwargs["config"].response_schema
+    assert "additionalProperties" not in response_schema
+    assert response_schema["properties"]["category"]["enum"] == [
+        "ACCESS",
+        "BUG",
+        "FEATURE",
+        "SECURITY",
+    ]
 
 
 def test_sanitizes_delimiter_injection() -> None:

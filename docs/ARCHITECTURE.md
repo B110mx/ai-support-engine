@@ -12,7 +12,7 @@ FastAPI / Pydantic
 SupportAnalyzer
   │
   ├── traditional ──► TraditionalEngine
-  └── generative  ──► GeminiEngine ──► Gemini API
+  └── generative  ──► GeminiSupportEngine ──► Gemini API
   │
   ▼
 AnalysisResult

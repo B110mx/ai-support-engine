@@ -29,6 +29,13 @@ Copy-Item .env.example .env
 
 Para usar `generative`, coloca una clave real en `GEMINI_API_KEY` dentro de `.env` o defínela como variable de entorno. Nunca subas el archivo `.env`.
 
+```dotenv
+GEMINI_API_KEY=tu_clave_local
+GEMINI_MODEL=gemini-3.5-flash-lite
+```
+
+Nombre visible recomendado para la credencial de desarrollo en Google AI Studio: `ase-dev-gemini-api-key`.
+
 ## Ejecución
 
 ```powershell
@@ -77,3 +84,11 @@ python scripts/compare.py
 ```
 
 El comando genera 20 registros en `results/comparison.csv` y las métricas de precisión en `results/summary.json`. No se generan respuestas simuladas para el motor generativo.
+
+Última ejecución real validada (22 de noviembre de 2026):
+
+- 10 casos por motor y 20 registros totales.
+- 20/20 respuestas con contrato JSON válido.
+- 0 errores de proveedor.
+- Precisión tradicional: 100%.
+- Precisión generativa con `gemini-3.5-flash-lite`: 90%.

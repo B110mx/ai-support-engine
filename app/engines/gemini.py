@@ -24,6 +24,28 @@ profesional en español. SECURITY siempre requiere revisión humana. Devuelve
 únicamente el objeto solicitado por el esquema JSON.
 """.strip()
 
+_GEMINI_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "category": {
+            "type": "string",
+            "enum": ["ACCESS", "BUG", "FEATURE", "SECURITY"],
+        },
+        "priority": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        },
+        "response": {"type": "string"},
+        "requiresHumanReview": {"type": "boolean"},
+    },
+    "required": [
+        "category",
+        "priority",
+        "response",
+        "requiresHumanReview",
+    ],
+}
+
 
 class GeminiSupportEngine:
     def __init__(
@@ -38,7 +60,7 @@ class GeminiSupportEngine:
 
         self.client = client or genai.Client(api_key=resolved_key)
         self.model_name = model_name or os.getenv(
-            "GEMINI_MODEL", "gemini-2.5-flash"
+            "GEMINI_MODEL", "gemini-3.5-flash-lite"
         )
 
     @staticmethod
@@ -63,7 +85,7 @@ class GeminiSupportEngine:
                 config=types.GenerateContentConfig(
                     system_instruction=_SYSTEM_INSTRUCTION,
                     response_mime_type="application/json",
-                    response_schema=EngineResult.model_json_schema(),
+                    response_schema=_GEMINI_RESPONSE_SCHEMA,
                     temperature=0.1,
                 ),
             )

@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-11-22T22:28:13.896128+00:00",
+  "totalCasesPerEngine": 10,
+  "totalRows": 20,
+  "accuracy": {
+    "traditional": 100.0,
+    "generative": 90.0
+  }
+}

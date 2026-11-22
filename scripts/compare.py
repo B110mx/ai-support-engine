@@ -3,19 +3,40 @@ from __future__ import annotations
 import csv
 import json
 import os
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from app.bootstrap import build_analyzer
-from app.domain.models import AnalysisMode, AnalyzeRequest
+from app.domain.errors import EngineExecutionError
+from app.domain.models import AnalysisMode, AnalysisResult, AnalyzeRequest
+from app.services.analyzer import SupportAnalyzer
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES_PATH = ROOT / "data" / "test_cases.json"
 RESULTS_DIR = ROOT / "results"
+MAX_PROVIDER_ATTEMPTS = 3
+
+
+def _analyze_with_retry(
+    analyzer: SupportAnalyzer, request: AnalyzeRequest
+) -> AnalysisResult:
+    attempts = MAX_PROVIDER_ATTEMPTS if request.mode is AnalysisMode.GENERATIVE else 1
+    for attempt in range(1, attempts + 1):
+        try:
+            return analyzer.analyze(request)
+        except EngineExecutionError:
+            if attempt == attempts:
+                raise
+            time.sleep(attempt)
+    raise RuntimeError("Se agotaron los intentos del proveedor.")
 
 
 def main() -> None:
+    load_dotenv(ROOT / ".env")
     if not os.getenv("GEMINI_API_KEY"):
         raise SystemExit(
             "Configura GEMINI_API_KEY antes de generar evidencia real."
@@ -29,7 +50,8 @@ def main() -> None:
         for mode in AnalysisMode:
             error = ""
             try:
-                result = analyzer.analyze(
+                result = _analyze_with_retry(
+                    analyzer,
                     AnalyzeRequest(message=case["message"], mode=mode)
                 )
                 actual_category = result.category.value

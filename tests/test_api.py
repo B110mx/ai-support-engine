@@ -76,10 +76,14 @@ def test_analyze_uses_common_contract() -> None:
 
 
 def test_analyze_returns_503_for_unregistered_engine() -> None:
-    response = client.post(
-        "/api/analyze",
-        json={"message": "Necesito ayuda", "mode": "generative"},
-    )
+    app.dependency_overrides[get_analyzer] = override_analyzer
+    try:
+        response = client.post(
+            "/api/analyze",
+            json={"message": "Necesito ayuda", "mode": "generative"},
+        )
+    finally:
+        app.dependency_overrides.clear()
 
     assert response.status_code == 503
     assert "todavía no está disponible" in response.json()["detail"]

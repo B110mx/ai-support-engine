@@ -9,6 +9,8 @@ description = "API para comparar clasificación tradicional y generativa de soli
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115,<1.0",
+  "google-genai>=1.0,<2.0",
+  "python-dotenv>=1.0,<2.0",
   "uvicorn[standard]>=0.30,<1.0"
 ]
 

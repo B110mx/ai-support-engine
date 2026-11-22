@@ -44,6 +44,17 @@ def test_health() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_registered_traditional_engine_works_without_override() -> None:
+    response = client.post(
+        "/api/analyze",
+        json={"message": "No puedo iniciar sesión", "mode": "traditional"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["category"] == "ACCESS"
+    assert response.json()["mode"] == "traditional"
+
+
 def test_analyze_uses_common_contract() -> None:
     app.dependency_overrides[get_analyzer] = override_analyzer
     try:

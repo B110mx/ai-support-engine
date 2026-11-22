@@ -1,18 +1,18 @@
 # AI Support Engine
 
-Base de una API local para analizar solicitudes de soporte mediante dos estrategias intercambiables: un motor tradicional y un motor generativo.
+API local para analizar solicitudes de soporte mediante dos estrategias intercambiables: un motor tradicional y un motor generativo con Gemini.
 
 ## Estado actual
 
-Esta rama contiene la base común del equipo:
+El proyecto incluye:
 
 - API con FastAPI y documentación automática.
 - Contrato único validado con Pydantic.
-- Servicio coordinador preparado para registrar ambos motores.
+- Motor tradicional basado en reglas deterministas.
+- Motor generativo con salida JSON estructurada mediante Gemini.
+- Servicio coordinador que selecciona el motor solicitado.
 - Manejo inicial de errores y revisión humana obligatoria para `SECURITY`.
 - Pruebas automáticas y flujo de CI.
-
-Los motores tradicional y generativo se implementarán en ramas separadas.
 
 ## Requisitos
 
@@ -24,7 +24,10 @@ Los motores tradicional y generativo se implementarán en ramas separadas.
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
+Copy-Item .env.example .env
 ```
+
+Para usar `generative`, coloca una clave real en `GEMINI_API_KEY` dentro de `.env` o defínela como variable de entorno. Nunca subas el archivo `.env`.
 
 ## Ejecución
 
@@ -57,10 +60,20 @@ uvicorn app.main:app --reload
 }
 ```
 
-Mientras un motor no esté registrado, su modo devuelve `503 Service Unavailable`. Consulta [la arquitectura](docs/ARCHITECTURE.md) y [la guía de colaboración](docs/CONTRIBUTING.md).
+Sin `GEMINI_API_KEY`, el modo tradicional funciona normalmente y el generativo devuelve `503 Service Unavailable`. Consulta [la arquitectura](docs/ARCHITECTURE.md) y [la guía de colaboración](docs/CONTRIBUTING.md).
 
 ## Pruebas
 
 ```powershell
 pytest
 ```
+
+## Evidencia comparativa
+
+`data/test_cases.json` contiene 10 solicitudes, incluyendo casos ambiguos y dos adversariales. Con una clave real configurada:
+
+```powershell
+python scripts/compare.py
+```
+
+El comando genera 20 registros en `results/comparison.csv` y las métricas de precisión en `results/summary.json`. No se generan respuestas simuladas para el motor generativo.
